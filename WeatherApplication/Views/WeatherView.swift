@@ -7,9 +7,9 @@
 import Foundation
 import SwiftUI
 
+//MARK: - Grid View Tile UI
 struct WeatherTile: View, Identifiable {
     let id = UUID()
-    let response: WeatherModel
     let title: String
     let value: String
     
@@ -17,50 +17,60 @@ struct WeatherTile: View, Identifiable {
         VStack {
             Text(title)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.white)//Heading Text
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.white)
+                .foregroundColor(.white)//Value Text
         }
     }
 }
 
-
+//MARK: - Content View
 struct ContentView: View {
-    @ObservedObject var viewModel = GetWeatherViewModel()
-    @State var WeatherResponse:WeatherModel?
-    @State private var searchString = String()
-    @State private var isKeyboardVisible = false
-    @State private var focusedFieldID: Int?
-
+    
+    @ObservedObject var viewModel = GetWeatherViewModel() //Instance of viewmodel
+    @State var WeatherResponse:WeatherModel?//Instance of model of weather response
+    @State private var searchString = String()//String passed to textfield
+    @State private var isKeyboardVisible = false // Used for managing keyboard
+    @State private var focusedFieldID: Int?// Used for focusing textfield
+    @State private var locationManager:LocationManager?//Instance of location manager
+    @State private var locationUpdateReceived = false
+    
+    
+    //MARK: - Method to avoid pushing textfield when keyboard is opened.
     private func observeKeyboard() {
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
             isKeyboardVisible = true
         }
-
+        
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { notification in
             isKeyboardVisible = false
         }
     }
-
+    
+    //MARK: -  Method to focus the Textfield
     private func scrollToField(_ id: Int) {
         withAnimation {
             focusedFieldID = id
         }
     }
+    
+    // MARK: - Grid View Tile styling parameters
     let tileSpacing: CGFloat = 16
     let tileWidth: CGFloat = (UIScreen.main.bounds.width * 0.38)
     let tileHeight: CGFloat = (UIScreen.main.bounds.height * 0.12)
-
+    
     var body: some View {
+        
         ScrollView{
+            
             ZStack {
                 Image("Sky")
-                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height) ///Background image
                 
                 VStack{
                     TextField("Enter City or State", text: $searchString)
-                        .textFieldStyle(SearchTextFieldStyle())
+                        .textFieldStyle(SearchTextFieldStyle())///Search Field
                     
                     Button("Find Weather Details"){
                         viewModel.getWeather(for: searchString) { (weather) in
@@ -69,23 +79,26 @@ struct ContentView: View {
                             UserDefaults.standard.synchronize()
                         }
                     }
-                    .buttonStyle(PrimaryButtonStyle())
-                   
+                    .buttonStyle(PrimaryButtonStyle())//Button To Find the weather Details
+                    
                     if let weatherData = self.WeatherResponse {
+                        ///Image from remote url and City name displayed horizontally
                         
                         HStack{
                             RemoteImageView(url:(URL(string:"https://openweathermap.org/img/wn/\(self.WeatherResponse?.weather?[0].icon ?? "")@2x.png") ?? URL(string: "https://openweathermap.org/img/wn/10d@2x.png"))!,
                                             placeholder: {
-                                Image("placeholder").frame(width: 20)},
+                                                Image("placeholder").frame(width: 20)},
                                             image: {
-                                $0
-                                    .resizable()
-                                    .scaledToFill()
-                                    .clipShape(Circle())
-                                .frame(width: 40, height: 40)})
+                                                $0
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .clipShape(Circle())
+                                                    .frame(width: 40, height: 40)})
                             Text("\(self.WeatherResponse?.name ?? "")")
                                 .modifier(MediumTextStyle())
                         }
+                        
+                        ///Temperature and weather description text
                         
                         Text("\(String(format: "%.2f", (roundTemperature(convertToFahrenheitFromKelvin(kelvin: self.WeatherResponse?.main?.temp ?? 0.0)))))")
                             .modifier(SemiBoldTextStyle())
@@ -100,17 +113,19 @@ struct ContentView: View {
                                 .modifier(MediumTextStyle())
                         }
                         
+                        ///Grid which has weather details
+                        
                         LazyVGrid(columns: [
                             GridItem(.adaptive(minimum: tileWidth)),
                             GridItem(.adaptive(minimum: tileWidth))
                         ], spacing: tileSpacing) {
                             ForEach([
-                                WeatherTile(response: weatherData, title: "Temperature", value: String(format: "%.1f F", convertToFahrenheitFromKelvin(kelvin: (weatherData.main?.temp) ?? 0.0))),
-                                WeatherTile(response: weatherData, title: "Humidity", value: "\(weatherData.main?.humidity ?? 0)%"),
-                                WeatherTile(response: weatherData, title: "Wind", value: "\(weatherData.wind?.speed ?? 0.0) m/s"),
-                                WeatherTile(response: weatherData, title: "Description", value: weatherData.weather?.first?.description ?? ""),
-                                WeatherTile(response: weatherData, title: "Visibility", value: "\(String(weatherData.visibility ?? 0)) miles"),
-                                WeatherTile(response: weatherData, title: "Pressure", value: "\(String(weatherData.main?.pressure ?? 0)) inHg")
+                                WeatherTile(title: "Temperature", value: String(format: "%.1f F", convertToFahrenheitFromKelvin(kelvin: (weatherData.main?.temp) ?? 0.0))),
+                                WeatherTile(title: "Humidity", value: "\(weatherData.main?.humidity ?? 0)%"),
+                                WeatherTile(title: "Wind", value: "\(weatherData.wind?.speed ?? 0.0) m/s"),
+                                WeatherTile(title: "Description", value: weatherData.weather?.first?.description ?? ""),
+                                WeatherTile(title: "Visibility", value: "\(String(weatherData.visibility ?? 0)) miles"),
+                                WeatherTile(title: "Pressure", value: "\(String(weatherData.main?.pressure ?? 0)) inHg")
                             ]) { tile in
                                 tile
                                     .frame(width: tileWidth, height: tileHeight)
@@ -119,36 +134,49 @@ struct ContentView: View {
                             }
                         }
                     } else {
-//                        Text("Failed to fetch weather data.")
                         Text("No City found")
                             .foregroundColor(.red)
                     }
                     Spacer()
                     
                 }.padding()
-                    .onAppear {
-                        
-                        observeKeyboard()
-                    }
+                .onAppear {
+                    observeKeyboard()
+                }
             }
         }
         .animation(.default)
         .background(Color.clear.opacity(0.3))
         .onAppear {
-            if let city = UserDefaults.standard.value(forKey: "PreviousCity") as? String {
-                searchString  = city
-                viewModel.getWeather(for: city) { (weather) in
-                    self.WeatherResponse = weather
-                    
+            /// Initialising Location Manager to access User's Location.
+            locationManager = LocationManager()
+            locationManager?.locationUpdateReceived = { city in
+                DispatchQueue.main.async {
+                    viewModel.getWeather(for: city) { (weather) in
+                        searchString = city
+                        self.WeatherResponse = weather
+                        print(weather as Any)
+                    }
                 }
             }
             
+            if locationManager?.checkLocationAuthorization() == true {
+                locationManager?.requestLocation()
+            } else {
+                /// Checking if User entered any city previously.
+                if let city = UserDefaults.standard.value(forKey: "PreviousCity") as? String {
+                    searchString = city
+                    viewModel.getWeather(for: city) { (weather) in
+                        self.WeatherResponse = weather
+                        
+                    }
+                }
+            }
         }
-        
     }
+    
+    
 }
-
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
@@ -156,4 +184,5 @@ struct ContentView_Previews: PreviewProvider {
             .previewLayout(.sizeThatFits)
     }
 }
+
 
