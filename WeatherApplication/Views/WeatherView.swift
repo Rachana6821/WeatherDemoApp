@@ -64,7 +64,9 @@ struct ContentView: View {
         
         ZStack {
             Image("Sky")
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height) ///Background image
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                .padding()
+            ///Background image
             
             VStack{
                 TextField("Enter City or State", text: $searchString)
