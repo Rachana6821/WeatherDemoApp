@@ -1,0 +1,5 @@
+# WeatherDemoApp![Simulator Screenshot - iPhone 14 - 2023-05-29 at 20 28 27](https://github.com/Rachana6821/WeatherDemoApp/assets/84131698/cebc11e0-e743-4514-b17c-cf1f74d7914c)
+![Simulator Screenshot - iPhone 14 - 2023-05-29 at 20 28 31](https://github.com/Rachana6821/WeatherDemoApp/assets/84131698/3ace755f-04bf-4e30-b162-eb775e7449b1)
+![Simulator Screenshot - iPhone 14 - 2023-05-29 at 20 28 42](https://github.com/Rachana6821/WeatherDemoApp/assets/84131698/a1562ab7-74f2-4ccb-82c1-b5589020d42a)
+![Simulator Screenshot - iPhone 14 - 2023-05-29 at 20 28 47](https://github.com/Rachana6821/WeatherDemoApp/assets/84131698/eb4a544a-4c50-49fc-91a2-b6721ab4cd8c)
+![Simulator Screenshot - iPhone 14 - 2023-05-29 at 20 32 13](https://github.com/Rachana6821/WeatherDemoApp/assets/84131698/95264c98-1af1-4967-b2e7-6477059c3128)
