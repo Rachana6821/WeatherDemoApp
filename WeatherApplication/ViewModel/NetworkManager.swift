@@ -18,12 +18,11 @@ class NetworkManager: NSObject {
     }
     
     struct APIURL {
-        static func weatherRequest(for search: String) -> String {
-            return "https://api.openweathermap.org/data/2.5/weather?q=\(search)&appid=\(NetworkManager.Key.APIKey)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        static func weatherRequest(for lat: String, long: String) -> String {
+            return "https://api.openweathermap.org/data/2.5/weather?lat=\(lat)&lon=\(long)&appid=\(NetworkManager.Key.APIKey)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
             
         }
     }
-    
     
     
 }

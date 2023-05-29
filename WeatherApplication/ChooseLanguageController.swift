@@ -9,22 +9,10 @@ import UIKit
 import SwiftUI
 
 class ChooseLanguageController: UIViewController {
-    
+
     @IBOutlet weak var swiftuiButton: UIButton!
     @IBOutlet weak var uikitButton: UIButton!
     
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
-        let appearance = UINavigationBarAppearance()
-        appearance.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-        navigationController?.navigationBar.tintColor = .white
-        navigationController?.navigationBar.standardAppearance = appearance
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +26,12 @@ class ChooseLanguageController: UIViewController {
             button?.layer.borderColor = UIColor.white.cgColor
             button?.layer.borderWidth = 1
         }
+        
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithTransparentBackground()
+        navBarAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        navigationController?.navigationBar.tintColor = .white
+        UINavigationBar.appearance().standardAppearance = navBarAppearance
         
     }
     

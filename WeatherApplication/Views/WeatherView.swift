@@ -55,125 +55,129 @@ struct ContentView: View {
         }
     }
     
+    
     // MARK: - Grid View Tile styling parameters
     let tileSpacing: CGFloat = 16
     let tileWidth: CGFloat = (UIScreen.main.bounds.width * 0.38)
     let tileHeight: CGFloat = (UIScreen.main.bounds.height * 0.12)
     
     var body: some View {
-        
-        ZStack {
-            Image("Sky")
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-            ///Background image
-            
-            VStack{
-                TextField("Enter City or State", text: $searchString)
-                    .textFieldStyle(SearchTextFieldStyle())///Search Field
+        GeometryReader { reader in
+            ZStack {
+                Image("Sky")
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
                 
-                Button("Find Weather Details"){
-                    viewModel.getWeather(for: searchString) { (weather) in
-                        self.WeatherResponse = weather
-                        UserDefaults.standard.setValue(searchString, forKey: "PreviousCity")
-                        UserDefaults.standard.synchronize()
-                    }
-                }
-                .buttonStyle(PrimaryButtonStyle())//Button To Find the weather Details
-                
-                if let weatherData = self.WeatherResponse {
-                    ///Image from remote url and City name displayed horizontally
-                    
-                    HStack{
-                        RemoteImageView(url:(URL(string:"https://openweathermap.org/img/wn/\(self.WeatherResponse?.weather?[0].icon ?? "")@2x.png") ?? URL(string: "https://openweathermap.org/img/wn/10d@2x.png"))!,
-                                        placeholder: {
-                            Image("placeholder").frame(width: 20)},
-                                        image: {
-                            $0
-                                .resizable()
-                                .scaledToFill()
-                                .clipShape(Circle())
-                            .frame(width: 40, height: 40)})
-                        Text("\(self.WeatherResponse?.name ?? "")")
-                            .modifier(MediumTextStyle())
-                    }
-                    
-                    ///Temperature and weather description text
-                    
-                    Text("\(String(format: "%.2f", (roundTemperature(convertToFahrenheitFromKelvin(kelvin: self.WeatherResponse?.main?.temp ?? 0.0)))))")
-                        .modifier(SemiBoldTextStyle())
-                    Text("\(self.WeatherResponse?.weather?[0].description ?? "")")
-                        .modifier(MediumTextStyle())
-                    
-                    HStack{
-                        Text("H: \(String(format: "%.2f",self.WeatherResponse?.coord?.lon ?? 0.0))")
-                            .modifier(MediumTextStyle())
+                ///Background image
+                ScrollView {
+                    VStack{
+                        TextField("Enter City or State", text: $searchString)
+                            .textFieldStyle(SearchTextFieldStyle())///Search Field
                         
-                        Text("L :\(String(format: "%.2f",self.WeatherResponse?.coord?.lat ?? 0.0))")
-                            .modifier(MediumTextStyle())
-                    }
-                    
-                    ///Grid which has weather details
-                    
-                    LazyVGrid(columns: [
-                        GridItem(.adaptive(minimum: tileWidth)),
-                        GridItem(.adaptive(minimum: tileWidth))
-                    ], spacing: tileSpacing) {
-                        ForEach([
-                            WeatherTile(title: "Temperature", value: String(format: "%.1f F", convertToFahrenheitFromKelvin(kelvin: (weatherData.main?.temp) ?? 0.0))),
-                            WeatherTile(title: "Humidity", value: "\(weatherData.main?.humidity ?? 0)%"),
-                            WeatherTile(title: "Wind", value: "\(weatherData.wind?.speed ?? 0.0) m/s"),
-                            WeatherTile(title: "Description", value: weatherData.weather?.first?.description ?? ""),
-                            WeatherTile(title: "Visibility", value: "\(String(weatherData.visibility ?? 0)) miles"),
-                            WeatherTile(title: "Pressure", value: "\(String(weatherData.main?.pressure ?? 0)) inHg")
-                        ]) { tile in
-                            tile
-                                .frame(width: tileWidth, height: tileHeight)
-                                .background(Color.black.opacity(0.3))
-                                .cornerRadius(10)
+                        Button("Find Weather Details"){
+                            viewModel.getWeather(for: searchString) { (weather) in
+                                UserDefaults.standard.setValue(searchString, forKey: "PreviousCity")
+                                UserDefaults.standard.synchronize()
+                                
+                                self.WeatherResponse = weather
+                                
+                            }
+                        }
+                        .buttonStyle(PrimaryButtonStyle())//Button To Find the weather Details
+                        
+                        if let weatherData = self.WeatherResponse {
+                            ///Image from remote url and City name displayed horizontally
+                            
+                            HStack{
+                                RemoteImageView(url:(URL(string:"https://openweathermap.org/img/wn/\(self.WeatherResponse?.weather?[0].icon ?? "")@2x.png") ?? URL(string: "https://openweathermap.org/img/wn/10d@2x.png"))!,
+                                                placeholder: {
+                                    Image("placeholder").frame(width: 20)},
+                                                image: {
+                                    $0
+                                        .resizable()
+                                        .scaledToFill()
+                                        .clipShape(Circle())
+                                    .frame(width: 40, height: 40)})
+                                Text("\(self.WeatherResponse?.name ?? "")")
+                                    .modifier(MediumTextStyle())
+                            }
+                            
+                            ///Temperature and weather description text
+                            
+                            Text("\(String(format: "%.2f", (roundTemperature(convertToFahrenheitFromKelvin(kelvin: self.WeatherResponse?.main?.temp ?? 0.0)))))")
+                                .modifier(SemiBoldTextStyle())
+                            Text("\(self.WeatherResponse?.weather?[0].description ?? "")")
+                                .modifier(MediumTextStyle())
+                            
+                            HStack{
+                                Text("H: \(String(format: "%.2f",self.WeatherResponse?.coord?.lon ?? 0.0))")
+                                    .modifier(MediumTextStyle())
+                                
+                                Text("L :\(String(format: "%.2f",self.WeatherResponse?.coord?.lat ?? 0.0))")
+                                    .modifier(MediumTextStyle())
+                            }
+                            
+                            ///Grid which has weather details
+                            
+                            LazyVGrid(columns: [
+                                GridItem(.adaptive(minimum: tileWidth)),
+                                GridItem(.adaptive(minimum: tileWidth))
+                            ], spacing: tileSpacing) {
+                                ForEach([
+                                    WeatherTile(title: "Temperature", value: String(format: "%.1f F", convertToFahrenheitFromKelvin(kelvin: (weatherData.main?.temp) ?? 0.0))),
+                                    WeatherTile(title: "Humidity", value: "\(weatherData.main?.humidity ?? 0)%"),
+                                    WeatherTile(title: "Wind", value: "\(weatherData.wind?.speed ?? 0.0) m/s"),
+                                    WeatherTile(title: "Description", value: weatherData.weather?.first?.description ?? ""),
+                                    WeatherTile(title: "Visibility", value: "\(String(weatherData.visibility ?? 0)) miles"),
+                                    WeatherTile(title: "Pressure", value: "\(String(weatherData.main?.pressure ?? 0)) inHg")
+                                ]) { tile in
+                                    tile
+                                        .frame(width: tileWidth, height: tileHeight)
+                                        .background(Color.black.opacity(0.3))
+                                        .cornerRadius(10)
+                                }
+                            }
+                        } else {
+                            Text("No City found")
+                                .foregroundColor(.red)
+                        }
+                        Spacer()
+                        
+                    }.padding()
+                        .onAppear {
+                            observeKeyboard()
+                        }
+                }
+                .animation(.none)
+                .background(Color.clear.opacity(0.3))
+                
+            }
+        }.animation(.none)
+            .onAppear {
+                /// Initialising Location Manager to access User's Location.
+                locationManager = LocationManager()
+                locationManager?.locationUpdateReceived = { city in
+                    DispatchQueue.main.async {
+                        viewModel.getWeather(for: city) { (weather) in
+                            searchString = city
+                            self.WeatherResponse = weather
+                            print(weather as Any)
                         }
                     }
-                } else {
-                    Text("No City found")
-                        .foregroundColor(.red)
                 }
-                Spacer()
                 
-            }.padding()
-                .onAppear {
-                    observeKeyboard()
-                }
-        }
-        .animation(.default)
-        .background(Color.clear.opacity(0.3))
-        .onAppear {
-            /// Initialising Location Manager to access User's Location.
-            locationManager = LocationManager()
-            locationManager?.locationUpdateReceived = { city in
-                DispatchQueue.main.async {
-                    viewModel.getWeather(for: city) { (weather) in
-                        searchString = city
-                        self.WeatherResponse = weather
-                        print(weather as Any)
-                    }
-                }
-            }
-            
-            if locationManager?.checkLocationAuthorization() == true {
-                locationManager?.requestLocation()
-            } else {
                 /// Checking if User entered any city previously.
                 if let city = UserDefaults.standard.value(forKey: "PreviousCity") as? String {
                     searchString = city
                     viewModel.getWeather(for: city) { (weather) in
                         self.WeatherResponse = weather
-                        
+                    }
+                }else{
+                    if locationManager?.checkLocationAuthorization() == true{
+                        locationManager?.requestLocation()
                     }
                 }
             }
-        }
     }
-    
-    
 }
 
 struct ContentView_Previews: PreviewProvider {

@@ -31,8 +31,6 @@ struct SearchTextFieldStyle: TextFieldStyle {
             .padding(10)
             .background(Color.white.opacity(0.5))
             .cornerRadius(5)
-            .padding(.top, 30)
-
     }
 }
 

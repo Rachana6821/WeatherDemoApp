@@ -15,3 +15,18 @@ extension UIStoryboard {
 
     static let main = UIStoryboard(name: "Main", bundle: nil)
 }
+
+
+extension UITextField {
+    func addLeftPadding(_ padding: CGFloat) {
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: padding, height: frame.height))
+        leftView = paddingView
+        leftViewMode = .always
+    }
+}
+extension UIDevice {
+    var hasNotch: Bool {
+        let bottom = UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0
+        return bottom > 0
+    }
+}

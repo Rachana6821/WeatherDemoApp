@@ -36,8 +36,26 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     func checkLocationAuthorization() -> Bool {
         switch CLLocationManager.authorizationStatus() {
         case .restricted, .denied:
+            let alert = UIAlertController(title: "Allow Location Access", message: "Weather needs access to your location. Turn on Location Services in your device settings.", preferredStyle: UIAlertController.Style.alert)
+            
+            // Button to Open Settings
+            alert.addAction(UIAlertAction(title: "Settings", style: UIAlertAction.Style.default, handler: { action in
+                guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                    return
+                }
+                if UIApplication.shared.canOpenURL(settingsUrl) {
+                    if let BUNDLE_IDENTIFIER = Bundle.main.bundleIdentifier,
+                        let url = URL(string: "\(UIApplication.openSettingsURLString)&path=LOCATION/\(BUNDLE_IDENTIFIER)") {
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                    }
+                }
+            }))
+            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil))
+            SceneDelegate.shared?.window?.rootViewController?.present(alert, animated: true, completion: nil)
             return false
-        default:
+            case .authorizedAlways, .authorizedWhenInUse:
+            return true
+            default:
             return true
         }
         
@@ -55,9 +73,35 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                     }
                 }
             }
-            
         }
+    }
+    
+    
+    func getCoordinates(for cityName: String, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+        let geocoder = CLGeocoder()
         
+        let region = CLCircularRegion(center: CLLocationCoordinate2D(latitude: 37.0902, longitude: -95.7129), radius: 100, identifier: "USA")
+        
+        geocoder.geocodeAddressString(cityName, in: region, preferredLocale: nil, completionHandler: { (placemarks, error) in
+            if let error = error {
+                // Handle error
+                print("Geocoding error: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            if let country = placemarks?.first?.country, country == "United States" {
+                if let placemark = placemarks?.first {
+                    let coordinates = placemark.location?.coordinate
+                    completion(coordinates)
+                } else {
+                    completion(nil)
+                }
+            } else {
+                completion(nil)
+            }
+            
+        })
     }
 }
 
